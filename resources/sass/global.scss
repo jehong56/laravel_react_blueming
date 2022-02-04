@@ -1,0 +1,28 @@
+.container {
+    background-color: #fff;
+    .section-box {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-left: 10px;
+        padding-bottom: 10px;
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    }
+    .blueming-storage-board-area {
+        background-color: rgb(44, 44, 44);
+        .storage-title {
+            text-align: center;
+            color: #ddd;
+            font-size: 17px;
+            font-weight: bold;
+        }
+        .blueming-storage {
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+    }
+}
