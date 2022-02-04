@@ -15,6 +15,8 @@ function Index() {
                 <br />
                 <Link to="/blueming"> Go 블루밍</Link>
                 <br />
+                <Link to="/friend"> DB 테스트</Link>
+                <br />
             </div>
         </div>
     );
