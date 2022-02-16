@@ -20,13 +20,17 @@ function BluemingCount(props) {
         let minutes = parseInt((timeRemaining - hour * 3600) / 60);
         let second = timeRemaining % 60;
         let strReturn = "";
-        if (hour > 0) {
-            strReturn += hour + "시 ";
+        if (timeRemaining > 0) {
+            if (hour > 0) {
+                strReturn += hour + "시 ";
+            }
+            if (minutes != 0 || hour != 0) {
+                strReturn += minutes + "분 ";
+            }
+            strReturn += second + "초 ";
+        } else {
+            strReturn += "블루밍 케이지 부화가 완료되었습니다!";
         }
-        if (minutes != 0 || hour != 0) {
-            strReturn += minutes + "시 ";
-        }
-        strReturn += second + "초 ";
         return strReturn;
     };
     let nowTime = new Date().getTime();
