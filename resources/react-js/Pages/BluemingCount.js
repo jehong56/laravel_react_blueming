@@ -7,13 +7,14 @@ function BluemingCount(props) {
     const [sort, setSort] = useState("ASC");
 
     useEffect(() => {
+        //1초에 1번이상 실행x
         const countdown = setInterval(() => {
             setTimerTime(new Date().getTime());
         }, 1000);
         return () => clearInterval(countdown);
     }, [parseInt(timerTime * 0.001)]);
+
     let remainingTimeCount = (endTimeStamp, nowTime) => {
-        //  const [timeRemaining, setTimeRemaining] = useState(null);
         let timeRemaining = endTimeStamp - nowTime;
         timeRemaining = parseInt(timeRemaining * 0.001);
         let hour = parseInt(timeRemaining / 3600);
@@ -22,22 +23,56 @@ function BluemingCount(props) {
         let strReturn = "";
         if (timeRemaining > 0) {
             if (hour > 0) {
-                strReturn += hour + "시 ";
+                strReturn += hour + "시간 ";
             }
             if (minutes != 0 || hour != 0) {
                 strReturn += minutes + "분 ";
             }
-            strReturn += second + "초 ";
+            strReturn += second + "초 남았습니다.";
         } else {
             strReturn += "블루밍 케이지 부화가 완료되었습니다!";
         }
         return strReturn;
     };
+
+    //알람체크
+    let isAlertCheck = (bluemingStorage) => {
+        let time = new Date().getTime();
+        let newList = [];
+        let isNowCompleted = false;
+        let name = "";
+
+        bluemingStorage.map((thisStorage, storageIndex) => {
+            let isAlert =
+                thisStorage.endTimeStamp - time < 0 && //남은시간이 0 미만이고
+                thisStorage.isAlert == false; //알람을 울리지 않은 상태일때
+            if (isAlert == true) {
+                //isAlert 두 조건이 모두 맞을경우
+                isNowCompleted = true;
+                thisStorage.isAlert = true;
+                name = thisStorage.name;
+            }
+            newList.push(thisStorage);
+        });
+
+        if (isNowCompleted) {
+            new Notification("블루밍 부화 완료!", {
+                body: name + "케이지의 부화가 완료되었습니다!",
+            });
+            props.setBluemingStorage(newList, false);
+            return true;
+        }
+        return false;
+    };
+    isAlertCheck(props.bluemingStorage);
+
+    //view, 정렬
     let nowTime = new Date().getTime();
     let viewDatas = [];
     props.bluemingStorage.map((storage) => {
         viewDatas.push(storage);
     });
+
     if (sort == "ASC") {
         viewDatas = viewDatas.sort(function (a, b) {
             if (a.endTimeStamp > b.endTimeStamp) {
@@ -61,6 +96,8 @@ function BluemingCount(props) {
             return 0;
         });
     }
+
+    //랜더링
     return (
         <div className="blueming-storage-board-area">
             <div className="storage-title">케이지 목록</div>
@@ -88,6 +125,7 @@ function BluemingCount(props) {
                         내림차순
                     </span>
                     {viewDatas.map((storage, storageIndex) => {
+                        //isAlertCheck;
                         return (
                             <div key={"bluming-item-" + storageIndex}>
                                 [{storage.name} 블루밍케이지]
@@ -96,7 +134,8 @@ function BluemingCount(props) {
                                 <br />
                                 skillRank : {storage.skillRank}
                                 <br />
-                                isFloweryCage : {storage.isFloweryCage}
+                                케이지 종류 :{" "}
+                                {storage.isFloweryCage ? "플라워리" : "일반"}
                                 <br />
                                 시작시간 : {storage.start}
                                 <br />

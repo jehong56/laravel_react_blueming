@@ -22,6 +22,7 @@ function Index() {
         { id: 15, rank: "F", decrease: 0.98 },
         { id: 16, rank: "연습", decrease: 1 },
     ];
+    // { id: 1, rank: "A", time: 86400 },
     const fynnyGems = [
         { id: 1, rank: "A", time: 86400 },
         { id: 2, rank: "B", time: 64800 },
@@ -30,35 +31,46 @@ function Index() {
         { id: 5, rank: "E", time: 10800 },
     ];
 
-    const [bluemingStorage, setBluemingStorage] = useState(
+    let [bluemingStorage, setBluemingStorage] = useState(
         localStorage.getItem("bluemingStorage") == null
             ? []
             : JSON.parse(localStorage.getItem("bluemingStorage"))
     );
+
+    function getNotificationPermission() {
+        // 브라우저 지원 여부 체크
+        if (!("Notification" in window)) {
+            alert("데스크톱 알림을 지원하지 않는 브라우저입니다.");
+        }
+        // 데스크탑 알림 권한 요청
+        Notification.requestPermission(function (result) {
+            // 권한 거절
+            if (result == "denied") {
+                alert(
+                    "알림을 차단하셨습니다.\n브라우저의 사이트 설정에서 변경하실 수 있습니다."
+                );
+                return false;
+            }
+        });
+    }
+    getNotificationPermission();
+
     const [cageName, setCageName] = useState("");
     const [nowSkillRank, setNowSkillRank] = useState(skillRanks[0]);
     const [nowFynnyGem, setNowFynnyGem] = useState(fynnyGems[0]);
     const [isFloweryCage, setIsFloweryCage] = useState(false);
 
-    /*
-    let nowDate = new Date().getTime();
-    console.log("now : " + new Date(nowDate));
-    console.log(tempTime);
-    console.log(
-        Math.floor(tempTime / 3600) +
-            "시간 " +
-            Math.round((tempTime % 3600) / 60) +
-            "분"
-    );
-    console.log("completed " + new Date(nowDate + tempTime * 1000));
-*/
-
-    const processSetBluemingStorage = (newBluemingStorage) => {
+    const processSetBluemingStorage = (newBluemingStorage, isUpdate = true) => {
+        //(스토리지, 내용업데이트 여부)
         localStorage.setItem(
             "bluemingStorage",
             JSON.stringify(newBluemingStorage)
         );
-        setBluemingStorage(newBluemingStorage);
+        if (isUpdate) {
+            setBluemingStorage(newBluemingStorage);
+        } else {
+            bluemingStorage = newBluemingStorage;
+        }
     };
     let pushButton = () => {
         let remainingTime =
@@ -69,7 +81,14 @@ function Index() {
         let today = new Date();
         let currentTime = today.getTime(); //시작 timestamp
         let completed = new Date(currentTime + remainingTime * 1000); //종료 timestamp
-        //저장해야할 것 : currentTime, tempTime
+        let hourCheck = (hour) => {
+            if (hour < 12) {
+                return "오전 " + (hour == 0 ? 12 : hour);
+            } else {
+                return "오후 " + (hour == 12 ? hour : hour - 12);
+            }
+        };
+
         let start =
             today.getFullYear() +
             "년 " +
@@ -77,7 +96,7 @@ function Index() {
             "월 " +
             today.getDate() +
             "일 " +
-            today.getHours() +
+            hourCheck(today.getHours()) +
             "시 " +
             today.getMinutes() +
             "분 " +
@@ -90,7 +109,7 @@ function Index() {
             "월 " +
             completed.getDate() +
             "일 " +
-            completed.getHours() +
+            hourCheck(completed.getHours()) +
             "시 " +
             completed.getMinutes() +
             "분 " +
@@ -98,12 +117,6 @@ function Index() {
             "초";
 
         let endTimeStamp = completed.getTime();
-        // "부화가 완료되기까지 " +
-        // Math.floor(tempTime / 3600) +
-        // "시간 " +
-        // Math.round((tempTime % 3600) / 60) +
-        // "분 남았습니다.";
-        //  setBluemingStorage([start, end, remainingTime]);
         let insertCageName = cageName;
         if (insertCageName == "") {
             insertCageName = tempArray.length + 1 + "번째";
@@ -123,11 +136,13 @@ function Index() {
             isFloweryCage: isFloweryCage,
             start: start,
             end: end,
-            inertTime: currentTime,
-            endTimeStamp: endTimeStamp,
+            inertTime: currentTime, //시작시간TimeStamp
+            endTimeStamp: endTimeStamp, //종료시간TimeStamp
+            isAlert: false,
         });
         processSetBluemingStorage(tempArray);
     };
+
     console.log("Render Bluming.js");
     return (
         <div className="container ">
@@ -203,7 +218,7 @@ function Index() {
                     })}
                 </select>
 
-                <label>케이지 타입</label>
+                <label>플라워리 블루밍 케이지 </label>
                 <input
                     type="checkbox"
                     name="isFloweryCage"
